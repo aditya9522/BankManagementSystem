@@ -18,7 +18,7 @@ pino = StringVar()
 pino.set("aditya")
 
 def account_list():
-    connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "aditya", database = "bank_system" )
+    connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "YourDatabase" )
     cursor = connection.cursor()
     cursor.execute("select account from useraccount_details")
     data = cursor.fetchall()
@@ -43,12 +43,25 @@ def account_list():
 #     ok = Button(win, text="OK", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange",command=fn_ok)
 #     ok.place(x=270, y=300)
 
+def NameIdentifier(acc):
+    con = mysql.connector.Connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
+    cursor = con.cursor()
+    cursor.execute("select account,fname,lname from useraccount_details")
+    data = cursor.fetchall()
+    cursor.close()
+    con.close()
+    for i in data:
+        if i[0] == acc :
+            name = "{} {}".format(i[-2], i[-1])
+            break
+    return name
+
 def historyb():
     his = Toplevel()
-    his.geometry("700x600")
+    his.geometry("800x600")
     his.title("History")
     his.configure(bg="steel blue")
-    top = Label(his, text="History", fg="red",width=20, bg="pink", font=("arial", 20, 'bold')).pack(side=TOP)
+    top = Label(his, text="History", fg="red",width=18, bg="pink", font=("arial", 20, 'bold')).pack(side=TOP)
     info = Label(his,text="Transaction Details ➡️", fg="purple", bg="aqua", font=("vardana", 15, 'bold'))
     info.place(x=40,y=80)
 
@@ -56,7 +69,19 @@ def historyb():
         accn.delete(0,"end")
 
     def OK():
-        if (ac.get()).isnumeric():
+        if ac.get() == "":
+            errorl.config(text="Please, Enter user account number!",fg="yellow")
+            accn.delete(0,"end")
+        elif ac.get() == "Click to enter account number":
+            errorl.config(text="      Click above to enter Acc No.",fg="black")
+            accn.delete(0,"end")
+        # elif ac.get().isalnum is False:
+        #     errorl.config(text="Don't try to enter alphabates / symbols !",fg="red")
+        #     accn.delete(0,"end")
+        elif int(ac.get()) not in account_list():
+            errorl.config(text="      Did not match with any user acc !",fg="red")
+            accn.delete(0,"end")
+        else:
             accn.destroy()
             errorl.destroy()
             ok.destroy()
@@ -65,120 +90,131 @@ def historyb():
             youracce = Label(his,text=ac.get(), fg="black", bg="aqua", font=("vardana", 15, 'bold'))
             youracce.place(x=370,y=80)
             info.place(x=40,y=130)
-            con = cx_Oracle.connect("system/adp@localhost/xepdb1")
+
+            userdata = "Hello mr/miss. {}, your transactions listed below : ".format(NameIdentifier(int(ac.get())))
+            userlabel = Label(his,text=userdata, fg="black", bg="steel blue", font=("calibri", 14, 'bold'))
+            userlabel.place(x=40,y=180)
+            
+            con = mysql.connector.Connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
             cursor = con.cursor()
-            cursor.execute("select * from atm_data")
+            cursor.execute("select tdate,ttime,withdrawals,deposites,current_balance from user_transactions where account= {}".format(ac.get()))
             data = cursor.fetchall()
             lst = ["Date","Time","Withdrawals","Deposites","Balance"]
-            n = 70
+            n = 100
             for i in lst:
-                lstd = Label(his,text=i, fg="green",width=9, bg="pink", font=("vardana", 15,"bold")).place(x=n,y=180)
+                lstd = Label(his,text=i, fg="green",width=9, bg="pink", font=("vardana", 15,"bold")).place(x=n,y=240)
                 n = n+120
 
-            a = 70
-            b = 212
+            a = 100
+            b = 272
             for i in data:
                 for j in i:
                     data = Label(his,text=j, bg="white",width=9, fg="steel blue", font=("vardana", 15,"bold")).place(x=a,y=b)
                     a = a+120
                 b = b+32
-                a = 70
-            con.commit()
+                a = 100
             cursor.close()
             con.close() 
-
-        elif (ac.get() == None) or (ac.get() == ""):
-            errorl.config(text="Please, Enter user account number!",fg="red")
-        elif ac.get() == "Click to enter account number":
-            errorl.config(text="Click above text to enter Acc number",fg="blue")
-        else:
-            print(ac.get())
-            errorl.config(text="Did not match with any user acc !",fg="red")
-
 
     ac = StringVar()
     accn = Entry(his, textvariable=ac,justify="center",width=32,fg="black", bg="white", font=("arial", 15, 'bold'),)
     accn.insert(0,"Click to enter account number")
     accn.bind("<FocusIn>",temp)
-    accn.place(x=160, y=150)       
-    errorl = Label(his, text="", font=('arial', 12, 'bold'), bg="aqua")
-    errorl.place(x=190, y=180)
-    ok = Button(his, text="OK", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange",command=OK)
-    ok.place(x=270, y=300)
+    accn.place(x=210, y=200)       
+    errorl = Label(his, text="", font=('calibri', 14, 'bold'), bg="steel blue")
+    errorl.place(x=240, y=240)
+    ok = Button(his, text="View", width=10, fg="white", font=('calibri', 15, 'bold'), bg="green",command=OK)
+    ok.place(x=320, y=350)
 
     his.mainloop()
 
 def aboutb():
     ab = Toplevel()
-    ab.geometry("700x450")
+    ab.geometry("750x500")
     ab.title("About")
-    ab.configure(bg="aqua")
-    top = Label(ab, text="About", fg="red", bg="aqua", font=("arial", 20, 'bold')).pack(side=TOP)
-    left = Label(ab,text="Bank Description ➡️", fg="purple", bg="aqua", font=("vardana", 18, 'bold')).place(x=40,y=80)
-    data = """               The Sagar Bank is a system. And it is designed by a team, 
-              contain three members as named as Ajay patel, Ajay 
-              patel and aditya patel. The main goal of this system is to
-              make easy transaction for the end user.By this user can easily
-              interact with the system because we have provided a very 
-              interactive and user friendly interface for the user and also
-              provides consistency,durability & atomacity of the transaction,
-              So the user will feel good experience with the system.
-              Thak-You """
-    lab1 = Label(ab, text=data, fg="black",bg="aqua", font=("arial", 15)).place(x=20,y=110)
-    l2 = Label(ab,text="Technology used ➡️", fg="purple", bg="aqua", font=("vardana", 15, 'bold')).place(x=40,y=330)
-    l2 = Label(ab,text="* Python Programming\n* Tkinter\n* Oracle DataBase(/SQL) ", fg="black", bg="aqua", font=("airal", 15)).place(x=200,y=360)
+    ab.configure(bg="steel blue")
+    top = Label(ab, text="About", fg="red",width=16, bg="pink", font=("arial", 20, 'bold')).pack(side=TOP)
+    left = Label(ab,text="Bank Description ➡️", fg="purple", bg="steel blue", font=("vardana", 15, 'bold')).place(x=40,y=80)
+    data = """◉ The Indian Bank is a system that is developed by aditya patel.
+    The main goal of this system is to make easy transaction for the end
+    user.By this user can easily interact with the system because I have
+    provided a very interactive and user friendly interface and also
+    provides consistency,durability & atomacity of the transactions.\n
+    ◉ It provides all the services that is needed to bank.\n
+    ◉ In this system, Please mantain minimum 100 rupees in account. 
+    """
+    lab1 = Label(ab, text=data, fg="black",bg="steel blue", font=("calibri", 15)).place(x=90,y=120)
+    l2 = Label(ab,text="Technology used ➡️", fg="purple", bg="steel blue", font=("arial", 15, 'bold')).place(x=40,y=340)
+    l2 = Label(ab,text="◉ Python Programming\n◉ Tkinter\n◉ Oracle DataBase(MySQL) ", fg="black", bg="steel blue", font=("calibri", 15)).place(x=200,y=370)
 
     ab.mainloop()
 
-def curb():
-    con = cx_Oracle.connect("system/adp@localhost/xepdb1")
+def curb(ac):
+    con = mysql.connector.Connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
     cursor = con.cursor()
-    cursor.execute("select current_balance from atm_data")
-    dt = cursor.fetchall()
-    avb = dt[-1][0]
+    cursor.execute("select current_balance from user_transactions where account= {}".format(ac))
+    data = cursor.fetchall()
+    avb = data[-1][0]
     current.set(avb)
-    con.commit()
+    cursor.close()
     con.close()
 
 def balance():
     bal = Toplevel()
-    bal.geometry("500x400")
+    bal.geometry("550x400")
     bal.title("Balance Check")
-    bal.configure(bg="aqua")
-    current_bal = DoubleVar()
-    curb()
+    bal.configure(bg="steel blue")
+    current_bal = StringVar()
 
     def show():
-        if (ac.get()).isnumeric():
-            lb = Entry(bal, text=current_bal,bd=0 ,width=20, fg="purple", font=('vardana', 15, 'bold'), bg="aqua").place(x=300, y=280)
+        if ac.get() == "":
+            errorl.config(text="Please, Enter user account number !",fg="yellow")
+            accn.delete(0,"end")
+        elif ac.get() == "Click to enter account number":
+            errorl.config(text="      Click above to enter Acc No.",fg="black")
+            accn.delete(0,"end")
+        # elif ac.get().isalnum is False:
+        #     errorl.config(text="Don't try to enter alphabates / symbols !",fg="red")
+        #     accn.delete(0,"end")
+        elif int(ac.get()) not in account_list():
+            errorl.config(text="      Did not match with any user acc !",fg="red")
+            accn.delete(0,"end")
+        else:
+            curb(int(ac.get()))
             b =  "{}/-".format(current.get())
             current_bal.set(b)
-            accshow = Label(bal, text=ac.get(), fg="black", font=('ariel', 15, 'bold'), bg="aqua").place(x=300, y=170)
-            errorl.config(text="User account detected",fg="green")
-            errorl.place(x=170, y=120)
-
-        elif (ac.get() == None) or (ac.get() == ""):
-            errorl.config(text="Please, Enter user account number!",fg="red")
-        elif ac.get() == "Click to enter account number":
-            errorl.config(text="Click above text to enter Acc number",fg="blue")
-        else:
-            print(ac.get())
-            errorl.config(text="Did not match with any user acc !",fg="red")
+            lb = Label(bal, text=current_bal.get(), fg="purple", font=('calibri', 15, 'bold'), bg="steel blue")
+            lb.place(x=310, y=330)
+            accshow = Label(bal, text=ac.get(), fg="black", font=('calibri', 15, 'bold'), bg="steel blue")
+            accshow.place(x=310, y=170)
+            n = NameIdentifier(int(ac.get()))
+            uname = Label(bal, text=n.upper(),fg="black", bg="steel blue", font=('calibri', 15, 'bold'))
+            uname.place(x=310, y=210)
+            errorl.config(text="✓ User account successfully detected",fg="#00FF66")
+            
+            
 
     def temp(e):
         accn.delete(0,"end")
-        
+
     ac = StringVar()
-    top = Label(bal, text="Check Balance", fg="red", bg="aqua", font=("arial", 20, 'bold'), pady=10).pack(side=TOP)
+    top = Label(bal, text="Check Balance", fg="red", bg="pink", width=15, font=("arial", 18, 'bold'))
+    top.pack(side=TOP)
     accn = Entry(bal, textvariable=ac,justify="center",width=32,fg="black", bg="white", font=("arial", 15, 'bold'),)
     accn.insert(0,"Click to enter account number")
     accn.bind("<FocusIn>",temp)
     accn.place(x=80, y=90)       
-    errorl = Label(bal, text=" ", font=('arial', 12, 'bold'), bg="aqua")
+    errorl = Label(bal, text=" ", font=('arial', 12, 'bold'), bg="steel blue")
     errorl.place(x=120, y=120)
-    balance1 = Label(bal, text="User Account Number :", fg="green", font=('ariel', 15, 'bold'), bg="aqua").place(x=75, y=170)
-    balance = Button(bal, text="Balance", width=10, fg="white", font=('ariel', 15, 'bold'), bg="blue", command=show).place(x=180, y=220)
-    lab1 = Label(bal, text="Available amount :     ₹", fg="green",bg="aqua", font=("arial", 15, 'bold')).place(x=80, y=280)
+    balance1 = Label(bal, text="User Account Number :", fg="white", font=('ariel', 15, 'bold'), bg="steel blue")
+    balance1.place(x=75, y=170)
+    userName = Label(bal, text="User Name :",justify="right", fg="white", font=('ariel', 15, 'bold'), bg="steel blue")
+    userName.place(x=75, y=210)
+    balance = Button(bal, text="show", width=10, fg="white", font=('arial', 15, 'bold'), bg="green", command=show)
+    balance.place(x=210, y=270)
+    lab1 = Label(bal, text="Available amount :     ₹", fg="white",bg="steel blue", font=("arial", 15, 'bold'))
+    lab1.place(x=80, y=330)
+    
     bal.mainloop()
 
 
@@ -187,126 +223,103 @@ def exit():
 
 def deposite():
     dep = Toplevel()
-    dep.geometry("600x400")
+    dep.geometry("650x400")
     dep.title("Deposite")
-    dep.configure(bg="aqua")
+    dep.configure(bg="steel blue")
     deposite_amount = DoubleVar()
     ac = StringVar()
 
-    def submit():
-        if (deposite_amount.get()).is_integer and deposite_amount.get() > 0.0:
-            curb()
-            now = current.get() + deposite_amount.get()
-            con = cx_Oracle.connect("system/adp@localhost/xepdb1")
-            cursor = con.cursor()
-            depa = deposite_amount.get()
-            cursor.execute("insert into atm_data values(&tdate,&ttime,0.0,&deposites,&current_balance)",(cdate,ctime,depa,now))
-            con.commit()
-            con.close()
-            text = "₹{}/- successfully deposited \nIn Acc number : 986038450335".format(deposite_amount.get())
-            messagebox.showinfo("Information", text)
-            dep.destroy()
-        elif deposite_amount.get() == 0.0:
-            dep.destroy()
-            messagebox.showwarning("Warning","Enter valid amount")
-
-    def temp(e):
-        accn.delete(0,"end")
-
     def OK():
-        if (ac.get()).isnumeric():
-            accn.destroy()
-            errorl.destroy()
-            ok.destroy()
-
-            lbl = Label(dep, text="Enter amount :", font=('arial', 15, 'bold'), fg="blue", bg="aqua").place(x=110, y=150)
-            entry = Entry(dep,textvariable=deposite_amount, width=20, fg="green", font=('arial', 15, 'bold'), bg="white").place(x=280, y=150)
-            error2 = Label(dep, text="", font=('arial', 12, 'bold'), bg="aqua")
-            error2.place(x=140, y=180)
-            btn = Button(dep, text="submit", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange", command=submit).place(x=220, y=300)
-
-        elif (ac.get() == None) or (ac.get() == ""):
-            errorl.config(text="Please, Enter user account number!",fg="red")
-        elif ac.get() == "Click to enter account number":
-            errorl.config(text="Click above text to enter Acc number",fg="blue")
+        if deposite_amount.get() == 0.0 or deposite_amount.get().is_integer == False:
+            messagebox.showerror("Warning" ,"Please,\nEnter valid amount !")
+            money_entry.delete(0,"end")
         else:
-            print(ac.get())
-            errorl.config(text="Did not match with any user acc !",fg="red")
+            curb(int(ac.get()))
+            total = current.get() + deposite_amount.get()
+            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
+            cursor = connection.cursor()
+            cursor.execute("insert into user_transactions values (%s,%s,%s,%s,%s,%s)", (int(ac.get()), cdate, ctime, 0, deposite_amount.get(),total))
+            connection.commit()
+            cursor.close()
+            connection.close()
+            data = "Hello Mr/miss {},\nIn your account ₹{}/- deposited successfully.".format(NameIdentifier(int(ac.get())),deposite_amount.get())
+            dep.destroy()
+            messagebox.showinfo("Information" , data)
+            
 
 
+    def accCheckButton():
+        if int(ac.get()) not in account_list():
+            accCheck.config(text="Didn't match with any account number", fg="red")
+        else:
+            accCheck.config(text="Account successfully Detected ", fg="yellow")
 
-    top = Label(dep, text="Deposite Money", fg="red", bg="aqua",font=("arial", 20, 'bold'), pady=10).pack(side=TOP)
-    accn = Entry(dep, textvariable=ac,justify="center",width=32,fg="black", bg="white", font=("arial", 15, 'bold'),)
-    accn.insert(0,"Click to enter account number")
-    accn.bind("<FocusIn>",temp)
-    accn.place(x=110, y=150)       
-    errorl = Label(dep, text="", font=('arial', 12, 'bold'), bg="aqua")
-    errorl.place(x=140, y=180)
-    ok = Button(dep, text="OK", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange", command=OK)
-    ok.place(x=220, y=300)
+    top = Label(dep, text="Deposite Money", width=15, fg="red", bg="pink",font=("calibri", 18, 'bold'))
+    top.pack(side=TOP)
+    account_label = Label(dep, text="Enter Account Number :", fg="white", font=('arial', 15, 'bold'), bg="steel blue")
+    account_label.place(x=75, y=100)
+    account_entry = Entry(dep, textvariable = ac, fg="white", font=('calibri', 15, 'bold'), bg="steel blue")
+    account_entry.place(x=320, y=100)
+    money_label = Label(dep, text = "Enter amount :", fg="white", font=('arial', 15, 'bold'), bg="steel blue")
+    money_label.place(x=75, y=180)
+    money_entry = Entry(dep, textvariable = deposite_amount, fg="white", font=('calibri', 15, 'bold'), bg="steel blue")
+    money_entry.place(x=320, y=180)
+    accCheck = Button(dep, text="varify acc number", font=('calibri', 13),bd=0, bg="steel blue", fg="blue", activebackground="steel blue",command=accCheckButton)
+    accCheck.place(x=320, y=130)
+    ok = Button(dep, text="deposite", width=8, fg="white", font=('calibri', 15, 'bold'), bg="green", command=OK)
+    ok.place(x=270, y=300)
     
     dep.mainloop()
 
 def withdraw():
     withd = Toplevel()
-    withd.geometry("600x400")
-    withd.title("Withdraw")
-    withd.configure(bg="aqua")
+    withd.geometry("650x400")
+    withd.title("Withdraw amount")
+    withd.configure(bg="steel blue")
     withdraw_amount = DoubleVar()
     ac = StringVar()
-
-    def submit2():
-        if withdraw_amount.get() > current.get():
-            withd.destroy()
-            messagebox.showerror("Invalid Operation","You have not sufficient amount, Please Try Again!")
-        elif withdraw_amount.get() == 0.0 or withdraw_amount.get().is_integer == False :
-            withd.destroy()
-            messagebox.showwarning("Warning","Enter valid amount")
-        else:     
-            curb()
-            now = current.get() - withdraw_amount.get()
-            con = cx_Oracle.connect("system/adp@localhost/xepdb1")
-            cursor = con.cursor()
-            witha = withdraw_amount.get()
-            cursor.execute("insert into atm_data values(&tdate,&ttime,&withdrawals,0.0,&current_balance)",(cdate,ctime,witha,now))
-            con.commit()
-            con.close()
-            txt = "₹{}/-  successfully Withdraw\nFrom Acc Number : 743938503925".format(withdraw_amount.get())
-            messagebox.showinfo("Information", txt)
-            
-            withd.destroy()
-
-    def temp(e):
-            accn.delete(0,"end")
-
+    
     def OK():
-        if (ac.get()).isnumeric():
-            accn.destroy()
-            errorl.destroy()
-            ok.destroy()
-
-            lbl = Label(withd, text="Enter amount :", font=('arial', 15, 'bold'), fg="blue", bg="aqua").place(x=110, y=150)
-            entry = Entry(withd,textvariable=withdraw_amount, width=20, fg="green", font=('arial', 15, 'bold'), bg="white").place(x=280, y=150)
-            error2 = Label(withd, text="", font=('arial', 12, 'bold'), bg="aqua")
-            error2.place(x=140, y=180)
-            btn = Button(withd, text="submit", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange", command=submit2).place(x=220, y=300)
-        elif (ac.get() == None) or (ac.get() == ""):
-            errorl.config(text="Please, Enter user account number!",fg="red")
-        elif ac.get() == "Click to enter account number":
-            errorl.config(text="Click above text to enter Acc number",fg="blue")
+        if  withdraw_amount.get() == 0.0 or withdraw_amount.get().is_integer == False:
+            messagebox.showwarning("Warning" ,"Please,\nEnter valid amount !")
+            money_entry.delete(0,"end")
+        elif withdraw_amount.get() > current.get():
+            messagebox.showerror("Error" ,"Please,\nEnter sufficient amount !")
+            money_entry.delete(0,"end")
         else:
-            print(ac.get())
-            errorl.config(text="Did not match with any user acc !",fg="red")
+            curb(int(ac.get()))
+            total = current.get() - withdraw_amount.get()
+            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
+            cursor = connection.cursor()
+            cursor.execute("insert into user_transactions values (%s,%s,%s,%s,%s,%s)", (int(ac.get()), cdate, ctime, withdraw_amount.get(), 0,total))
+            connection.commit()
+            cursor.close()
+            connection.close()
+            data = "Hello Mr/miss {},\nIn your account ₹{}/- withdrawn successfully.".format(NameIdentifier(int(ac.get())),withdraw_amount.get())
+            withd.destroy()
+            messagebox.showinfo("Information" , data)
+            
 
-    top = Label(withd, text="Withdraw Money", fg="red", bg="aqua",font=("arial", 20, 'bold'), pady=10).pack(side=TOP)
-    accn = Entry(withd, textvariable=ac,justify="center",width=32,fg="black", bg="white", font=("arial", 15, 'bold'),)
-    accn.insert(0,"Click to enter account number")
-    accn.bind("<FocusIn>",temp)
-    accn.place(x=110, y=150)       
-    errorl = Label(withd, text="", font=('arial', 12, 'bold'), bg="aqua")
-    errorl.place(x=140, y=180)
-    ok = Button(withd, text="OK", width=10, fg="white", font=('vardana', 15, 'bold'), bg="orange", command=OK)
-    ok.place(x=220, y=300)
+    def accCheckButton():
+        if int(ac.get()) not in account_list():
+            accCheck.config(text="Didn't match with any account number", fg="red")
+        else:
+            accCheck.config(text="Account successfully Detected ", fg="yellow")
+
+    top = Label(withd, text="Withdraw Money", width=15, fg="red", bg="pink",font=("calibri", 18, 'bold'))
+    top.pack(side=TOP)
+    account_label = Label(withd, text="Enter Account Number :", fg="white", font=('arial', 15, 'bold'), bg="steel blue")
+    account_label.place(x=75, y=100)
+    account_entry = Entry(withd, textvariable = ac, fg="white", font=('calibri', 15, 'bold'), bg="steel blue")
+    account_entry.place(x=320, y=100)
+    money_label = Label(withd, text = "Enter amount :", fg="white", font=('arial', 15, 'bold'), bg="steel blue")
+    money_label.place(x=75, y=180)
+    money_entry = Entry(withd, textvariable = withdraw_amount, fg="white", font=('calibri', 15, 'bold'), bg="steel blue")
+    money_entry.place(x=320, y=180)
+    accCheck = Button(withd, text="varify acc number", font=('calibri', 13),bd=0, bg="steel blue", fg="blue", activebackground="steel blue",command=accCheckButton)
+    accCheck.place(x=320, y=130)
+    ok = Button(withd, text="withdraw", width=8, fg="white", font=('calibri', 15, 'bold'), bg="green", command=OK)
+    ok.place(x=270, y=300)
     
     withd.mainloop()
     
@@ -337,13 +350,16 @@ def NewAC():
             a = age.get()
             ad = add.get()
             pin = pc.get()
-            
-            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "aditya", database = "bank_system" )
+            d = cdate
+            t = ctime
+            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
             cursor = connection.cursor()
             cursor.execute("insert into useraccount_details (account, fname, lname, gender, phone, age, address, pincode) values(%s, %s, %s, %s, %s, %s, %s, %s)",(ac,f,l,g,p,a,ad,pin))
+            cursor.execute("insert into user_transactions values (%s, %s, %s, 0, 100.0, 100.0)",(ac,d,t))
             connection.commit()
+            cursor.close() 
             connection.close()
-            messagebox.showinfo("Information","Hii, mr/miss - {}\nYour account number: {}".format(f+" "+l,ac))
+            messagebox.showinfo("Information","Hii, mr/miss - {}\nYour account number: {}\nAnd ₹100.00/- has credited to your acc.".format(f+" "+l,ac))
             New.destroy()
 
     def reset():
@@ -355,8 +371,8 @@ def NewAC():
         add.set("")
         pc.set(0)
 
-    top = Label(New,text="Create Bank Account",width=20,bg="steel blue",fg="red",font=("vardana",20,"bold")).pack(side=TOP)
-    enter = Label(New,text="Enter Details ➡️",bg="steel blue",fg="purple",font=("vardana",18,"bold")).place(x=50,y=100)
+    top = Label(New,text="Open Bank Account",width=20,bg="pink",fg="red",font=("vardana",18,"bold")).pack(side=TOP)
+    enter = Label(New,text="Enter Details ➡️",bg="steel blue",fg="purple",font=("vardana",17,"bold")).place(x=50,y=100)
     lbl = Label(New, text="First Name", font=('arial', 15, 'bold'), fg="blue", bg="steel blue").place(x=250, y=150)
     entry = Entry(New,textvariable=fn, width=20, fg="red", font=('arial', 15, 'bold'), bg="white").place(x=450, y=150)
     lbl2 = Label(New, text="Last Name", font=('arial', 15, 'bold'), fg="blue", bg="steel blue").place(x=250, y=200)
@@ -388,7 +404,6 @@ def NewAC():
 
     New.mainloop()
 
-
 def UserDetail():
     ACDetail = Toplevel()
     ACDetail.title("Acc Details")
@@ -401,7 +416,7 @@ def UserDetail():
     def closeb():
         ACDetail.destroy()
         
-    tp = Label(ACDetail,text="User Account Details",bg="steel blue",fg="red",font=("arial 18 bold"))
+    tp = Label(ACDetail,text="User Account Details",width=18,bg="pink",fg="red",font=("arial 18 bold"))
     tp.pack()
     close = Button(ACDetail, text="Close", fg="red", font=('arial', 12, 'bold'), bg="steel blue",command=closeb)
     close.place(x=500, y=50)
@@ -413,12 +428,16 @@ def UserDetail():
     def OK():
         if ac.get() == "":
             errorl.config(text="Please, Enter user account number!",fg="red")
+            accn.delete(0,"end")
         elif ac.get() == "Click to enter account number":
             errorl.config(text="        Click above to enter Acc No.",fg="red")
-        # elif ac.get().isalpha:
-        #     errorl.config(text="Don't try to enter alphabates / symbols !",fg="red")
+            accn.delete(0,"end")
+        elif ac.get().isalnum is False:
+            errorl.config(text="Don't try to enter alphabates / symbols !",fg="red")
+            accn.delete(0,"end")
         elif int(ac.get()) not in account_list():
             errorl.config(text="        Did not match with any user acc !",fg="red")
+            accn.delete(0,"end")
         else:
             accn.destroy()
             ok.destroy()
@@ -440,7 +459,7 @@ def UserDetail():
             l8 = Label(f3,text="Pin Code :",fg="blue",font=("arial 16 bold"))
             l8.place(x=60,y=330)
 
-            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "aditya", database = "bank_system" )
+            connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "Yourpasswd", database = "Yourdatabase" )
             cursor = connection.cursor()
             cursor.execute("select * from useraccount_details where account = %s",(int(ac.get()),))
             data = cursor.fetchall()
@@ -494,7 +513,7 @@ def changePin():
             pin.destroy()
 
         p = StringVar()
-        top = Label(pin, text="Change PIN Number", fg="red", bg="aqua", font=("arial", 20, 'bold'), pady=10).pack(side=TOP)
+        top = Label(pin, text="Change PIN Number", fg="red", bg="pink", font=("arial", 20, 'bold'), pady=10).pack(side=TOP)
         lbl = Label(pin, text="Current PIN Number : ", font=('arial', 15, 'bold'), fg="blue", bg="aqua").place(x=50, y=100)
         entry = Entry(pin, width=20,textvariable=p, fg="green", font=('arial', 15, 'bold'), bg="white").place(x=350, y=100)
         p.set(pino.get())
@@ -510,10 +529,10 @@ def changePin():
 
 def active_users():
     active = Toplevel()
-    active.geometry("700x600")
+    active.geometry("1300x600")
     active.title("Active Users")
     active.configure(bg="steel blue")
-    top = Label(active, text="Account List", fg="red",width=20, bg="steel blue", font=("arial", 20, 'bold')).pack(side=TOP)
+    top = Label(active, text="Account List", fg="red",width=20, bg="pink", font=("arial", 20, 'bold')).pack(side=TOP)
     info = Label(active,text="Active Account List ➡️", fg="purple", bg="steel blue", font=("vardana", 15, 'bold')).place(x=40,y=80)
 
     connection = mysql.connector.connect(host = "127.0.0.1", user = "root", passwd = "aditya", database = "bank_system" )
@@ -534,9 +553,9 @@ def active_users():
             a = a+145
         b = b+32
         a = 70
-    connection.commit()
+    
     cursor.close()
-
+    connection.close()
     active.mainloop()
 
 activeuser = Button(frame,fg="black",bd=1,bg="white",width=7,font=("arial", 13, 'bold'), text="AccList",activebackground="pink",relief=SUNKEN, command=active_users)
@@ -551,7 +570,7 @@ exitb.pack(pady=11)
 root.geometry("950x600")
 root.title("Menu")
 root.configure(bg="steel blue")
-top = Label(root, text="Welcome To Sagar Bank", fg="red",width=30, bg="pink",font=("arial", 20, 'bold')).pack(side=TOP)
+top = Label(root, text="Bank Management System", fg="red",width=30, bg="pink",font=("arial", 20, 'bold')).pack(side=TOP)
 localtime = time.asctime(time.localtime(time.time()))
 time = Label(root, font=('aria', 15), text=localtime,fg="blue", anchor=W,bg="aqua", padx=10)
 time.pack()
@@ -573,5 +592,6 @@ Details = Button(frame3, padx=10, pady=15,width=16, bd=2,fg="blue",bg="aqua",fon
 Details.place(x=550, y=400)
 l = Label(root, text = "Thankyou for Using",bg="yellow",width=80, fg = "purple", font=('Times New Roman', 20,'bold')) 
 l.pack(side = BOTTOM)
+
 
 root.mainloop()

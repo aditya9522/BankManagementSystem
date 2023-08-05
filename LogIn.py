@@ -3,7 +3,7 @@ from tkinter import messagebox
 import subprocess
 
 logwin = Tk()
-logwin.title("LogIn(manager id/pass)")
+logwin.title("LogIn")
 logwin.geometry("800x550")
 logwin.configure(bg="pink")
 u = StringVar()
@@ -49,7 +49,7 @@ def NewAccount():
 def submited():
     us = u.get()
     pa = p.get()
-    if us == "bank" and pa == "pass":
+    if us == "ap123" and pa == "pass":
         error_info.config(text="You have successfully LogIn to the system",bg="steel blue",fg="green",font=("vardana",12,"bold"))
         messagebox.showinfo("msg","LOGIN successful")
         logwin.destroy()
@@ -63,9 +63,9 @@ def submited():
         pas.delete(0,END)
 
 
-head = Label(logwin, text = "Manager LogIn window", bg="pink", fg="red", font=("vardana",20,"bold"))
+head = Label(logwin, text = "LogIn window", bg="pink", fg="red", font=("vardana",20,"bold"))
 head.pack(side = TOP)
-l = Label(logwin,text="🛃  This login window is for Bank manager that operates the Bank so it is \nrequired to fill ID or Password entries only by the Bank manager",bg="pink",font="arial 15")
+l = Label(logwin,text="🛃  Please enter the user ID or Password ",bg="pink",font="arial 15")
 l.place(x=100,y=100)
 f1 = Frame(logwin,width=500,height=300,bg="steel blue",highlightbackground="blue",highlightthickness=3)
 f1.place(x=150,y=160)
